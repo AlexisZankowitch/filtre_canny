@@ -9,17 +9,21 @@
 //Start
 function cannyFilter()
     matrix_image = chargerImage('/home/zank/git/filtre_canny/grayflower.png',0);
-    mask=[1,2,1;2,4,2;1,2,1];
     maskx=[1,2,1];
     masky=[1,2,1]';
+    mask3=[1,2,1;2,4,2;1,2,1];
+    mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
     disp('MASK Y =')
     mask_application(matrix_image,masky);
     
     disp('MASK X =')
     mask_application(matrix_image,maskx);
     
-//    disp('MASK =')
-//    mask_application(matrix_image,mask);
+    disp('MASK 3 =')
+    mask_application(matrix_image,mask3);
+    
+    disp('MASK 5 =')
+    mask_application(matrix_image,mask5);
 endfunction
 
 //load image and stock it into a matrix
@@ -48,25 +52,16 @@ function mask_application(matrix_image,mask)
     matrix_image = ones(10,10);
     
 //    mid size
-    mid_size_mask_x=ceil(size(mask,1)/2);
-    mid_size_mask_y=ceil(size(mask,2)/2);
+    disp('mask')
+    disp(floor(size(mask,2)/2))
+    mid_size_mask_x=floor(size(mask,1)/2);
+    mid_size_mask_y=floor(size(mask,2)/2);
     disp('mid size mask')
     disp(mid_size_mask_x);
-    disp(mid_size_mask_x);
+    disp(mid_size_mask_y);
     
 //    image extension
-//    issue when mid_size_mask = 1
-    if mid_size_mask_x == 1 then
-        x=0
-    else 
-        x = mid_size_mask_x
-    end
-    if mid_size_mask_y == 1 then
-        y=0
-    else 
-        y = mid_size_mask_y
-    end
-    matrix_image_bigger = zeros(size(matrix_image,1)+x,size(matrix_image,2)+y)
+    matrix_image_bigger = zeros(size(matrix_image,1)+2*mid_size_mask_x,size(matrix_image,2)+2*mid_size_mask_y)
     
     disp('size matrixIm')
     disp(size(matrix_image))
@@ -74,8 +69,8 @@ function mask_application(matrix_image,mask)
     disp(size(matrix_image_bigger))
     
 //    image placement
-    x= mid_size_mask_x:size(matrix_image_bigger,1)-(mid_size_mask_x-1);
-    y= mid_size_mask_y:size(matrix_image_bigger,2)-(mid_size_mask_y-1);
+    x= mid_size_mask_x+1:size(matrix_image_bigger,1)-(mid_size_mask_x);
+    y= mid_size_mask_y+1:size(matrix_image_bigger,2)-(mid_size_mask_y);
     disp('inner matrix line')
     disp(x),    disp(y)
     matrix_image_bigger(x,y)=matrix_image;
@@ -113,5 +108,6 @@ function masking(matrix_image,mask_f)
         yy=0;
         xx=xx+1;
     end
+    //xx & yy voyage dans l'image pour la multiplication avec le masque
     disp(matrix_new);
 endfunction
