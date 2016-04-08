@@ -14,45 +14,29 @@ function cannyFilter()
     mask3=[1,2,1;2,4,2;1,2,1];
     mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
 //    disp('MASK Y =')
-//    mask_application(matrix_image,masky);
+//    algorithm(matrix_image,masky);
     
 //    disp('MASK X =')
-//    mask_application(matrix_image,maskx);
+//    algorithm(matrix_image,maskx);
     
 //    disp('MASK 3 =')
-    matrix_image = mask_application(matrix_image,mask3);
-    disp(matrix_image);
-    //    gradient
-    [mat_n_grad,mat_a_grad] = gradient(matrix_image);
-    disp(mat_n_grad)
-    disp(mat_a_grad)
-    
+    algorithm(matrix_image,mask3);
     
 //    disp('MASK 5 =')
-//    mask_application(matrix_image,mask5);
+//    algorithm(matrix_image,mask5);
 endfunction
 
-//load image and stock it into a matrix
-function matrix_image=chargerImage(path,isRGB)
-    if isRGB == 0 then
-        matrix_image=double(imread(path));
-    else
-        matrix_image=double(rgb2gray(imread(path)));
-    end
-endfunction
-
-//Show image
-function afficherImage(matrix_image)
-    imshow(uint8(matrix_image));
-endfunction
-
-//Save image
-function image = ecrireImage(matrix_image,nomFichier)
-    image=imwrite(matrix_image,nomFichier);
+function algorithm(matrix_image,mask)
+    matrix_imageB = mask_application(matrix_image,mask);
+    matrix_masked = masking(matrix_imageB, mask);
+    [mat_n_grad,mat_a_grad] = gradient(matrix_masked);
+    disp(mat_n_grad)
+    disp(mat_a_grad)
+    //    matrix_image = matrix_new(x,y);
 endfunction
 
 //Extend image
-function matrix_new = mask_application(matrix_image,mask)
+function matrix_image_bigger = mask_application(matrix_image,mask)
    
 //    JUST FOR TEST
     matrix_image = ones(10,10);
@@ -82,14 +66,10 @@ function matrix_new = mask_application(matrix_image,mask)
     matrix_image_bigger(x,y)=matrix_image;
 //    disp('Big matrix')
 //    disp(matrix_image_bigger);
-    
-//    mask application
-    matrix_new = masking(matrix_image_bigger,mask)
-//    matrix_image = matrix_new(x,y);
 endfunction
 
 //    2 boucles pour la matric 2 boucle pour le masque faire la somme des produits des case de meme indice et les stocker dans la case
-function matrix_new = masking(matrix_image,mask_f)
+function matrix_masked = masking(matrix_image,mask_f)
 //    loop begins where the picture is
 //    disp('Masking')
     mid_size_mask_x=floor(size(mask_f,1)/2);
@@ -104,7 +84,7 @@ function matrix_new = masking(matrix_image,mask_f)
     end
     xx = 0;
     yy = 0;
-    matrix_new = matrix_image;
+    matrix_masked = matrix_image;
     for x = start_x:max_x
         for y = start_y:max_y
             acc_mask = 0;
@@ -114,7 +94,7 @@ function matrix_new = masking(matrix_image,mask_f)
                     acc_mask = (acc_mask + mult)
                 end
             end
-            matrix_new(x,y)=acc_mask/sum_mask;
+            matrix_masked(x,y)=acc_mask/sum_mask;
             yy=yy+1;
         end
         yy=0;
@@ -142,7 +122,9 @@ function [mat_n_grad,mat_a_grad] = gradient(matrix_image)
             mat_a_grad(i,j) = atan(-mat_grad_x(i,j),mat_grad_y(i,j))
                         
             //normalisation
+            //degree 
             mat_a_grad(i,j) = 180 * mat_a_grad(i,j) / %pi
+            mat_a_grad(i,j) = normalisation(mat_a_grad(i,j));
         end
     end
 //    display
@@ -152,17 +134,53 @@ function [mat_n_grad,mat_a_grad] = gradient(matrix_image)
 //    appeler normalisation recursivement
 endfunction
 
-function mat_a_grad = normalisation()
-    // 0 : -22,5 && 22,5
-    if mat_a_grad(i,j) < 0 then
-        mat_a_grad(i,j) = mat_a_grad(i,j) + 180;
-    elseif mat_a_grad(i,j) < 45 then
-        mat_a_grad(i,j) = 0;
-    elseif mat_a_grad(i,j) < 90 then
-        mat_a_grad(i,j) = 45;
-    elseif mat_a_grad(i,j) < 135 then
-        mat_a_grad(i,j) = 90;
+function val = normalisation(val)
+    val_check = [0,45,90,135];    
+//    disp('--------------strat--------------')
+//    disp(val)
+    if val < -22.5 then
+        val = val + 180;
+    elseif val >= -22.5 & val < 22.5 then
+        val = 0;
+    elseif val >= 22.5 & val < 67.5 then
+        val = 45;
+    elseif val >= 67.5 & val < 112.5 then
+        val = 90;
+    elseif val > 112.5 & val < 157.5 then
+        val = 135;
     else
-        mat_a_grad(i,j) = mat_a_grad(i,j) - 180;
+        val = val - 180;
     end
+//    disp('--------------calc--------------')
+//    disp(val)
+    if size(find(val_check==val),1) == 0 then
+        val = normalisation(val);
+    end
+endfunction
+
+
+
+
+
+
+
+
+
+//load image and stock it into a matrix
+function matrix_image=chargerImage(path,isRGB)
+    if isRGB == 0 then
+        matrix_image=double(imread(path));
+    else
+        matrix_image=double(rgb2gray(imread(path)));
+    end
+endfunction
+
+//Show image
+function afficherImage(matrix_image)
+    imshow(uint8(matrix_image));
+endfunction
+
+//Save image
+function image = ecrireImage(matrix_image,nomFichier)
+    image=imwrite(matrix_image,nomFichier);
 endfunction
