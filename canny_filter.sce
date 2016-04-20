@@ -9,8 +9,8 @@
 //Start
 function cannyFilter()
     img1 = '/home/zank/git/filtre_canny/grayflower.png';
-    img2 =  '/home/zank/git/filtre_canny/sonia.png';
-    img3 =  '/home/zank/git/filtre_canny/crop.png';
+    img2 = '/home/zank/git/filtre_canny/sonia.png';
+    img3 = '/home/zank/git/filtre_canny/canny.jpg';
     
     step_hist = 100;
     threshold = 0.80;
@@ -20,8 +20,7 @@ function cannyFilter()
     mask3=[1,2,1;2,4,2;1,2,1];
     mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
     
-//    disp('MASK 3 =')
-    algorithm(img2,0,mask3,step_hist,threshold);
+    algorithm(img1,0,mask5,step_hist,threshold);
     
 endfunction
 
@@ -38,7 +37,9 @@ function algorithm(img,gray,mask,step_hist,threshold)
     disp('MAXIMUM SUPPRESSION');
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
     disp('HISTERESIS');
+    disp('  seuil:');
     [th,t1] = threshold_determination(mat_n_grad,step_hist,threshold);
+    disp(threshold);
     matrix_hysteresis = hysteresis(matrice_nMax,mat_a_grad,th,t1);
 
     //resize matrix 
@@ -251,25 +252,25 @@ function matrix_hysteresis=hysteresis(matrice_nMax,mat_a_grad,th,t1)
             elseif matrice_nMax(i,j) > t1 then
                 select mat_a_grad(i,j)
                 case 0 then
-                    if(get_pixel(matrice_nMax,i-1,j) > 0 & get_pixel(matrice_nMax,i+1,j) > 0) then
+                    if(get_pixel(matrice_nMax,i-1,j) > th & get_pixel(matrice_nMax,i+1,j) > th) then
                         matrix_hysteresis(i,j) = matrice_nMax(i,j);
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 45 then
-                    if(get_pixel(matrice_nMax,i-1,j-1) > 0 & get_pixel(matrice_nMax,i+1,j+1) > 0) then
+                    if(get_pixel(matrice_nMax,i-1,j-1) > th & get_pixel(matrice_nMax,i+1,j+1) > th) then
                         matrix_hysteresis(i,j) = matrice_nMax(i,j);
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 90 then
-                    if(get_pixel(matrice_nMax,i,j-1) > 0 & get_pixel(matrice_nMax,i,j+1) > 0) then
+                    if(get_pixel(matrice_nMax,i,j-1) > th & get_pixel(matrice_nMax,i,j+1) > th) then
                         matrix_hysteresis(i,j) = matrice_nMax(i,j);
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 135 then
-                    if(get_pixel(matrice_nMax,i+1,j-1) > 0 & get_pixel(matrice_nMax,i-1,j+1) > 0) then
+                    if(get_pixel(matrice_nMax,i+1,j-1) > th & get_pixel(matrice_nMax,i-1,j+1) > th) then
                         matrix_hysteresis(i,j) = matrice_nMax(i,j);
                     else
                         matrix_hysteresis(i,j) = 0;
