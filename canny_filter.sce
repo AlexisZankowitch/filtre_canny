@@ -45,8 +45,9 @@ function algorithm(matrix_image,mask)
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
     
     disp('HISTERESIS');
-    mat_hist = hysteresis(mat_n_grad,100);
-//    disp(matrice_nMax)
+    [th,t1] = threshold_determination(mat_n_grad,101,0.7);
+    matrix_hysteresis = hysteresis(matrice_nMax,[th,t1]);
+    disp([th,t1])
 
     //resize matrix 
     mat_img_croped = matrice_nMax(x,y);
@@ -221,16 +222,15 @@ function pixel = get_pixel(mat, i, j)
 endfunction
 
 //Hysteresis
-function matrix_hysteresis = hysteresis(matrix_n,hist_p)
-//    sum of all pixel
-    size_m = size(matrix_n,1)*size(matrix_n,2);
-    x = 1;
-//    normalisation
+function [th,t1] = threshold_determination(matrix_n,hist_p,threshold)
+//    round matrix n
     for (i = 1 : size(matrix_n,1))
         for (j = 1 : size(matrix_n,2))
             matrix_norm(i,j) = floor(matrix_n(i,j));
         end
     end
+    
+//    histogram
     max_m = max(matrix_norm);
     min_m = min(matrix_norm);
     val_m = max_m-min_m;
@@ -249,15 +249,31 @@ function matrix_hysteresis = hysteresis(matrix_n,hist_p)
     end
     
     subplot(121);
-    histplot(hist_x,hist(1,:), style=5);//issue axe Y
+    plot(round(hist_x),hist(1,:),style=5);
     
+//    fonction de repartition
     matrix_repar = hist/sum(hist);
     matrix_repar = cumsum(matrix_repar);
     subplot(122);
-    plot([min_m:step:max_m],matrix_repar(1,:),'go');
-    disp(hist);
-    disp(matrix_repar);
+    plot([min_m:step:max_m],matrix_repar(1,:),'b-o');
     
+//    threshold 
+    c = 1;
+    while threshold > matrix_repar(1,c)
+        c = c + 1;
+    end
+    if c > 1 then
+        s_max = matrix_repar(1,c) - threshold;
+        s_min = threshold - matrix_repar(1,c-1);  
+        if s_max > s_min then
+            c = c-1
+        end
+    end
+    
+//    th & t1 
+    th = round(hist_x(1,c));
+    t1 = 0.5 * th;
+
     matrix_hysteresis = matrix_norm;
 endfunction
 
