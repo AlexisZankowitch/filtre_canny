@@ -11,18 +11,21 @@ function cannyFilter()
     img1 = '/home/zank/git/filtre_canny/grayflower.png';
     img2 =  '/home/zank/git/filtre_canny/sonia.png';
     img3 =  '/home/zank/git/filtre_canny/crop.png';
+    
+    step_hist = 100;
+    threshold = 0.80;
+    
     maskx=[1,2,1];
     masky=[1,2,1]';
     mask3=[1,2,1;2,4,2;1,2,1];
     mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
     
 //    disp('MASK 3 =')
-//    algorithm(img1,0,mask3);
-    algorithm(img2,0,mask3);
+    algorithm(img2,0,mask3,step_hist,threshold);
     
 endfunction
 
-function algorithm(img,gray,mask)
+function algorithm(img,gray,mask,step_hist,threshold)
     matrix_image = chargerImage(img,gray);
     matrix_image = matrix_image(:,:,1);
     
@@ -35,8 +38,6 @@ function algorithm(img,gray,mask)
     disp('MAXIMUM SUPPRESSION');
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
     disp('HISTERESIS');
-    step_hist = 100;
-    threshold = 0.80;
     [th,t1] = threshold_determination(mat_n_grad,step_hist,threshold);
     matrix_hysteresis = hysteresis(matrice_nMax,mat_a_grad,th,t1);
 
