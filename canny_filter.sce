@@ -29,7 +29,7 @@ endfunction
 function algorithm(matrix_image,mask)
     
     //    JUST FOR TEST
-//    matrix_image = ones(5,5);
+//    matrix_image = ones(10,10);
 //    disp(matrix_image);
     
     disp('MASK APPLICATION');
@@ -45,7 +45,7 @@ function algorithm(matrix_image,mask)
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
     
     disp('HISTERESIS');
-    mat_hist = hysteresis(matrice_nMax);
+    mat_hist = hysteresis(mat_n_grad,10);
 //    disp(matrice_nMax)
 
     //resize matrix 
@@ -221,21 +221,38 @@ function pixel = get_pixel(mat, i, j)
 endfunction
 
 //Hysteresis
-function matrix_hysteresis = hysteresis(matrix_n)
+function matrix_hysteresis = hysteresis(matrix_n,hist_p)
 //    sum of all pixel
-    sum_matrix = sum(matrix_n);
-    matrix_norm = matrix_n;
+    size_m = size(matrix_n,1)*size(matrix_n,2);
+    x = 1;
 //    normalisation
     for (i = 1 : size(matrix_n,1))
         for (j = 1 : size(matrix_n,2))
-            matrix_norm(i,j) = matrix_n(i,j)/sum_matrix;
-            tt(i*j) = matrix_norm(i,j);
+            matrix_norm(i,j) = floor(matrix_n(i,j));
         end
     end
-    disp(sum(matrix_norm));
-    plot([1:1:size(matrix_norm,1)*size(matrix_norm,2)],tt)
-    
-    
+    max_m = max(matrix_norm);
+    min_m = min(matrix_norm);
+    val_m = max_m-min_m;
+    hist = zeros(1,hist_p);
+    hist_x = hist;
+    for (i=1 : size(hist_x,2))
+        hist_x(1,i)=val_m * i / hist_p;
+    end
+    disp(hist);
+    disp(hist_x);
+    for (i = 1 : size(matrix_norm,1))
+        for (j = 1 : size(matrix_norm,2))
+            
+        end
+    end
+//    disp(hist);
+//    subplot(121);
+//    plot2d(,hist);
+//    
+//    matrix_repar = cumsum(hist);
+//    subplot(122);
+//    plot2d(matrix_repar);
     
     matrix_hysteresis = matrix_norm;
 endfunction
@@ -259,3 +276,6 @@ endfunction
 function image = ecrireImage(matrix_image,nomFichier)
     image=imwrite(matrix_image,nomFichier);
 endfunction
+
+
+cannyFilter()
