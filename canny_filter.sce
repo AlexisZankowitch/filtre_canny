@@ -8,29 +8,23 @@
 
 //Start
 function cannyFilter()
-    matrix_image = chargerImage('/home/zank/git/filtre_canny/grayflower.png',0);
+    img1 = '/home/zank/git/filtre_canny/grayflower.png';
+    img2 =  '/home/zank/git/filtre_canny/sonia.png';
+    img3 =  '/home/zank/git/filtre_canny/crop.png';
     maskx=[1,2,1];
     masky=[1,2,1]';
     mask3=[1,2,1;2,4,2;1,2,1];
     mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
-//    disp('MASK Y =')
-//    algorithm(matrix_image,masky);
-    
-//    disp('MASK X =')
-//    algorithm(matrix_image,maskx);
     
 //    disp('MASK 3 =')
-    algorithm(matrix_image,mask3);
+//    algorithm(img1,0,mask3);
+    algorithm(img2,0,mask3);
     
-//    disp('MASK 5 =')
-//    algorithm(matrix_image,mask5);
 endfunction
 
-function algorithm(matrix_image,mask)
-    
-    //    JUST FOR TEST
-//    matrix_image = ones(10,10);
-//    disp(matrix_image);
+function algorithm(img,gray,mask)
+    matrix_image = chargerImage(img,gray);
+    matrix_image = matrix_image(:,:,1);
     
     disp('MASK APPLICATION');
     [matrix_imageB,x,y] = mask_application(matrix_image,mask);
@@ -38,21 +32,20 @@ function algorithm(matrix_image,mask)
     matrix_masked = masking(matrix_imageB, mask);
     disp('GRADIENT');
     [mat_n_grad,mat_a_grad] = gradient(matrix_masked);
-//    mat_n_grad(3,3)=10;
-//    disp(mat_n_grad)
-//    disp(mat_a_grad)
     disp('MAXIMUM SUPPRESSION');
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
-    
     disp('HISTERESIS');
-    [th,t1] = threshold_determination(mat_n_grad,101,0.7);
-    matrix_hysteresis = hysteresis(matrice_nMax,[th,t1]);
-    disp([th,t1])
+    step_hist = 100;
+    threshold = 0.80;
+    [th,t1] = threshold_determination(mat_n_grad,step_hist,threshold);
+    matrix_hysteresis = hysteresis(matrice_nMax,mat_a_grad,th,t1);
 
     //resize matrix 
-    mat_img_croped = matrice_nMax(x,y);
-    matrix_images = [matrix_image mat_img_croped]
-//    afficherImage(matrix_images); //EROR INCONSISTENT COLUMN/ROW DIMENSION
+    mat_nMax_croped = matrice_nMax(x,y);
+    mat_hyst_cropped = matrix_hysteresis(x,y);
+    matrix_masked_cropped = matrix_masked(x,y);
+    matrix_images = [matrix_image matrix_masked_cropped mat_nMax_croped mat_hyst_cropped];
+    afficherImage(matrix_images);
     //    matrix_image = matrix_new(x,y);
 endfunction
 
@@ -273,8 +266,43 @@ function [th,t1] = threshold_determination(matrix_n,hist_p,threshold)
 //    th & t1 
     th = round(hist_x(1,c));
     t1 = 0.5 * th;
+endfunction
 
-    matrix_hysteresis = matrix_norm;
+function matrix_hysteresis=hysteresis(matrice_nMax,mat_a_grad,th,t1)
+    for i=1 : size(matrice_nMax,1)
+        for j=1 : size(matrice_nMax,2)
+            if matrice_nMax(i,j) > th then
+                matrix_hysteresis(i,j) = matrice_nMax(i,j);
+            elseif matrice_nMax(i,j) > t1 then
+                select mat_a_grad(i,j)
+                case 0 then
+                    if(get_pixel(matrice_nMax,i-1,j) > 0 & get_pixel(matrice_nMax,i+1,j) > 0) then
+                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                    else
+                        matrix_hysteresis(i,j) = 0;
+                    end
+                case 45 then
+                    if(get_pixel(matrice_nMax,i-1,j-1) > 0 & get_pixel(matrice_nMax,i+1,j+1) > 0) then
+                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                    else
+                        matrix_hysteresis(i,j) = 0;
+                    end
+                case 90 then
+                    if(get_pixel(matrice_nMax,i,j-1) > 0 & get_pixel(matrice_nMax,i,j+1) > 0) then
+                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                    else
+                        matrix_hysteresis(i,j) = 0;
+                    end
+                case 135 then
+                    if(get_pixel(matrice_nMax,i+1,j-1) > 0 & get_pixel(matrice_nMax,i-1,j+1) > 0) then
+                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                    else
+                        matrix_hysteresis(i,j) = 0;
+                    end
+                end
+            end
+        end
+    end
 endfunction
 
 
