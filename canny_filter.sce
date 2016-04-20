@@ -27,19 +27,31 @@ function cannyFilter()
 endfunction
 
 function algorithm(matrix_image,mask)
-    matrix_imageB = mask_application(matrix_image,mask);
+    
+    //    JUST FOR TEST
+//    matrix_image = ones(5,5);
+//    disp(matrix_image);
+    
+    disp('MASK APPLICATION');
+    [matrix_imageB,x,y] = mask_application(matrix_image,mask);
+    disp('MASKING');
     matrix_masked = masking(matrix_imageB, mask);
+    disp('GRADIENT');
     [mat_n_grad,mat_a_grad] = gradient(matrix_masked);
-    disp(mat_n_grad)
-    disp(mat_a_grad)
+//    mat_n_grad(3,3)=10;
+//    disp(mat_n_grad)
+//    disp(mat_a_grad)
+    disp('MAXIMUM SUPPRESSION');
+    matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
+//    disp(matrice_nMax)
+    mat_img_croped = matrice_nMax(x,y);
+    matrix_images = [matrix_image mat_img_croped]
+    afficherImage(matrix_images); //EROR INCONSISTENT COLUMN/ROW DIMENSION
     //    matrix_image = matrix_new(x,y);
 endfunction
 
 //Extend image
-function matrix_image_bigger = mask_application(matrix_image,mask)
-   
-//    JUST FOR TEST
-    matrix_image = ones(10,10);
+function [matrix_image_bigger,x,y] = mask_application(matrix_image,mask)
     
 //    mid size
 //    disp('mask')
@@ -158,11 +170,50 @@ function val = normalisation(val)
     end
 endfunction
 
+//non max suppression
+function matrice_nMax = deleteNMax(mat_n_grad, mat_a_grad)
+    matrice_nMax = mat_n_grad;
+    for i = 1 : size(mat_n_grad,1)
+        for j = 1 : size(mat_n_grad,2)
+            select mat_a_grad(i,j)
+            case 0 then
+                if(mat_n_grad(i,j) > get_pixel(mat_n_grad,i-1,j) & mat_n_grad(i,j) > get_pixel(mat_n_grad,i+1,j)) then
+                    matrice_nMax(i,j) = mat_n_grad(i,j);
+                else
+                    matrice_nMax(i,j) = 0;
+                end
+            case 45 then
+                if(mat_n_grad(i,j) > get_pixel(mat_n_grad,i+1,j-1) & mat_n_grad(i,j) > get_pixel(mat_n_grad,i-1,j+1)) then
+                    matrice_nMax(i,j) = mat_n_grad(i,j);
+                else
+                    matrice_nMax(i,j) = 0;
+                end
+            case 90 then
+                if(mat_n_grad(i,j) > get_pixel(mat_n_grad,i,j-1) & mat_n_grad(i,j) > get_pixel(mat_n_grad,i,j+1)) then
+                    matrice_nMax(i,j) = mat_n_grad(i,j);
+                else
+                    matrice_nMax(i,j) = 0;
+                end
+            case 135 then
+                if(mat_n_grad(i,j) > get_pixel(mat_n_grad,i-1,j-1) & mat_n_grad(i,j) > get_pixel(mat_n_grad,i+1,j+1)) then
+                    
+                    matrice_nMax(i,j) = mat_n_grad(i,j);
+                else
+                    matrice_nMax(i,j) = 0;
+                end
+            end
+        end
+    end    
+endfunction
 
 
-
-
-
+function pixel = get_pixel(mat, i, j)
+    if(i >= 1 & j >=1 & i <= size(mat,1) & j <= size(mat,2))
+        pixel = mat(i,j);
+    else
+        pixel = -1;
+    end
+endfunction
 
 
 
