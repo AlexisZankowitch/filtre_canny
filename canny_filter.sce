@@ -47,43 +47,26 @@ function algorithm(img,gray,mask,step_hist,threshold)
     matrix_masked_cropped = matrix_masked(x,y);
     matrix_images = [matrix_image matrix_masked_cropped mat_nMax_croped mat_hyst_cropped];
     afficherImage(matrix_images);
-    //    matrix_image = matrix_new(x,y);
 endfunction
 
 //Extend image
 function [matrix_image_bigger,x,y] = mask_application(matrix_image,mask)
     
-//    mid size
-//    disp('mask')
-//    disp(floor(size(mask,2)/2))
     mid_size_mask_x=floor(size(mask,1)/2);
     mid_size_mask_y=floor(size(mask,2)/2);
-//    disp('mid size mask')
-//    disp(mid_size_mask_x);
-//    disp(mid_size_mask_y);
     
 //    image extension
     matrix_image_bigger = zeros(size(matrix_image,1)+2*mid_size_mask_x,size(matrix_image,2)+2*mid_size_mask_y)
     
-//    disp('size matrixIm')
-//    disp(size(matrix_image))
-//    disp('size mBig')
-//    disp(size(matrix_image_bigger))
-    
 //    image placement
     x= mid_size_mask_x+1:size(matrix_image_bigger,1)-(mid_size_mask_x);
     y= mid_size_mask_y+1:size(matrix_image_bigger,2)-(mid_size_mask_y);
-//    disp('inner matrix line')
-//    disp(x),    disp(y)
     matrix_image_bigger(x,y)=matrix_image;
-//    disp('Big matrix')
-//    disp(matrix_image_bigger);
 endfunction
 
 //    2 boucles pour la matric 2 boucle pour le masque faire la somme des produits des case de meme indice et les stocker dans la case
 function matrix_masked = masking(matrix_image,mask_f)
 //    loop begins where the picture is
-//    disp('Masking')
     mid_size_mask_x=floor(size(mask_f,1)/2);
     mid_size_mask_y=floor(size(mask_f,2)/2);
     max_x = size(matrix_image,1)-mid_size_mask_x;
@@ -139,17 +122,10 @@ function [mat_n_grad,mat_a_grad] = gradient(matrix_image)
             mat_a_grad(i,j) = normalisation(mat_a_grad(i,j));
         end
     end
-//    display
-//    disp(mat_n_grad)
-//    disp(mat_a_grad)
-
-//    appeler normalisation recursivement
 endfunction
 
 function val = normalisation(val)
     val_check = [0,45,90,135];    
-//    disp('--------------strat--------------')
-//    disp(val)
     if val < -22.5 then
         val = val + 180;
     elseif val >= -22.5 & val < 22.5 then
@@ -163,8 +139,6 @@ function val = normalisation(val)
     else
         val = val - 180;
     end
-//    disp('--------------calc--------------')
-//    disp(val)
     if size(find(val_check==val),1) == 0 then
         val = normalisation(val);
     end
