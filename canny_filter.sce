@@ -43,10 +43,15 @@ function algorithm(matrix_image,mask)
 //    disp(mat_a_grad)
     disp('MAXIMUM SUPPRESSION');
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
+    
+    disp('HISTERESIS');
+    mat_hist = hysteresis(matrice_nMax);
 //    disp(matrice_nMax)
+
+    //resize matrix 
     mat_img_croped = matrice_nMax(x,y);
     matrix_images = [matrix_image mat_img_croped]
-    afficherImage(matrix_images); //EROR INCONSISTENT COLUMN/ROW DIMENSION
+//    afficherImage(matrix_images); //EROR INCONSISTENT COLUMN/ROW DIMENSION
     //    matrix_image = matrix_new(x,y);
 endfunction
 
@@ -215,6 +220,25 @@ function pixel = get_pixel(mat, i, j)
     end
 endfunction
 
+//Hysteresis
+function matrix_hysteresis = hysteresis(matrix_n)
+//    sum of all pixel
+    sum_matrix = sum(matrix_n);
+    matrix_norm = matrix_n;
+//    normalisation
+    for (i = 1 : size(matrix_n,1))
+        for (j = 1 : size(matrix_n,2))
+            matrix_norm(i,j) = matrix_n(i,j)/sum_matrix;
+            tt(i*j) = matrix_norm(i,j);
+        end
+    end
+    disp(sum(matrix_norm));
+    plot([1:1:size(matrix_norm,1)*size(matrix_norm,2)],tt)
+    
+    
+    
+    matrix_hysteresis = matrix_norm;
+endfunction
 
 
 //load image and stock it into a matrix
