@@ -45,7 +45,7 @@ function algorithm(matrix_image,mask)
     matrice_nMax = deleteNMax(mat_n_grad,mat_a_grad);
     
     disp('HISTERESIS');
-    mat_hist = hysteresis(mat_n_grad,10);
+    mat_hist = hysteresis(mat_n_grad,100);
 //    disp(matrice_nMax)
 
     //resize matrix 
@@ -234,25 +234,29 @@ function matrix_hysteresis = hysteresis(matrix_n,hist_p)
     max_m = max(matrix_norm);
     min_m = min(matrix_norm);
     val_m = max_m-min_m;
-    hist = zeros(1,hist_p);
+    step = (max_m - min_m)/hist_p;
+    hist = zeros(1,hist_p+1);
     hist_x = hist;
-    for (i=1 : size(hist_x,2))
-        hist_x(1,i)=val_m * i / hist_p;
+    hist_x(1,1)=0;
+    for (i=2 : size(hist_x,2))
+        hist_x(1,i) = step + hist_x(1,i-1);
     end
-    disp(hist);
-    disp(hist_x);
     for (i = 1 : size(matrix_norm,1))
         for (j = 1 : size(matrix_norm,2))
-            
+            pos = (floor(((matrix_norm(i,j) - min_m )) / step)+1);
+            hist(1,pos) = hist(1,pos) +1;
         end
     end
-//    disp(hist);
-//    subplot(121);
-//    plot2d(,hist);
-//    
-//    matrix_repar = cumsum(hist);
-//    subplot(122);
-//    plot2d(matrix_repar);
+    
+    subplot(121);
+    histplot(hist_x,hist(1,:), style=5);//issue axe Y
+    
+    matrix_repar = hist/sum(hist);
+    matrix_repar = cumsum(matrix_repar);
+    subplot(122);
+    plot([min_m:step:max_m],matrix_repar(1,:),'go');
+    disp(hist);
+    disp(matrix_repar);
     
     matrix_hysteresis = matrix_norm;
 endfunction
