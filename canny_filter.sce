@@ -15,11 +15,13 @@ function cannyFilter(base_path, step_hist, threshold,factorTh,img)
     if isnum(img) then
         select img
         case "1" then
-            img = strcat([base_path,'grayflower.png']);
+            img = strcat([base_path,'/grayflower.png']);
         case "2" then
-            img = strcat([base_path,'sonia.png']);
+            img = strcat([base_path,'/sonia.png']);
         case "3" then 
-            img = strcat([base_path,'canny.jpg']);
+            img = strcat([base_path,'/canny.jpg']);
+        case "4" then
+            img = strcat([base_path,'/Twitter-logo2.png']);
         end
     end
     
@@ -198,6 +200,7 @@ function matrice_nMax = deleteNMax(mat_n_grad, mat_a_grad)
 endfunction
 
 
+//solves indexes issues
 function pixel = get_pixel(mat, i, j)
     if(i >= 1 & j >=1 & i <= size(mat,1) & j <= size(mat,2))
         pixel = mat(i,j);
