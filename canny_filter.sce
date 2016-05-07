@@ -7,23 +7,38 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //Start
-function cannyFilter()
-    img1 = '/home/zank/git/filtre_canny/grayflower.png';
-    img2 = '/home/zank/git/filtre_canny/sonia.png';
-    img3 = '/home/zank/git/filtre_canny/canny.jpg';
+function cannyFilter(base_path, step_hist, threshold,factorTh,img)
     
-    step_hist = 100;
-    threshold = 0.80;
+    //imgs
+//    base_path = "/home/zank/git/filtre_canny/";
+
+    if isnum(img) then
+        select img
+        case "1" then
+            img = strcat([base_path,'grayflower.png']);
+        case "2" then
+            img = strcat([base_path,'sonia.png']);
+        case "3" then 
+            img = strcat([base_path,'canny.jpg']);
+        end
+    end
     
+    //variables
+//    step_hist = 120;
+//    threshold = 0.85;
+//    factorTh = 0.5;
+    
+    //mask wich can be used
     maskx=[1,2,1];
     masky=[1,2,1]';
     mask3=[1,2,1;2,4,2;1,2,1];
     mask5=[1,2,4,2,1;2,4,8,4,2;4,8,16,8,4;2,4,8,4,2;1,2,4,2,1]
     
-    algorithm(img1,0,mask5,step_hist,threshold);
+    algorithm(img,0,mask5,step_hist,threshold);
     
 endfunction
 
+//start canny filter
 function algorithm(img,gray,mask,step_hist,threshold)
     matrix_image = chargerImage(img,gray);
     matrix_image = matrix_image(:,:,1);
@@ -63,6 +78,7 @@ function [matrix_image_bigger,x,y] = mask_application(matrix_image,mask)
     x= mid_size_mask_x+1:size(matrix_image_bigger,1)-(mid_size_mask_x);
     y= mid_size_mask_y+1:size(matrix_image_bigger,2)-(mid_size_mask_y);
     matrix_image_bigger(x,y)=matrix_image;
+    
 endfunction
 
 //    2 boucles pour la matric 2 boucle pour le masque faire la somme des produits des case de meme indice et les stocker dans la case
@@ -218,7 +234,7 @@ function [th,t1] = threshold_determination(matrix_n,hist_p,threshold)
     end
     
     subplot(121);
-    plot(round(hist_x),hist(1,:),style=5);
+    histplot(round(hist_x),hist(1,:),style=5);
     
 //    fonction de repartition
     matrix_repar = hist/sum(hist);
@@ -241,37 +257,38 @@ function [th,t1] = threshold_determination(matrix_n,hist_p,threshold)
     
 //    th & t1 
     th = round(hist_x(1,c));
-    t1 = 0.5 * th;
+    t1 = factorTh * th;
 endfunction
 
 function matrix_hysteresis=hysteresis(matrice_nMax,mat_a_grad,th,t1)
+    matrix_hysteresis = zeros(size(matrice_nMax));
     for i=1 : size(matrice_nMax,1)
         for j=1 : size(matrice_nMax,2)
             if matrice_nMax(i,j) > th then
-                matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                matrix_hysteresis(i,j) = 255;
             elseif matrice_nMax(i,j) > t1 then
                 select mat_a_grad(i,j)
                 case 0 then
                     if(get_pixel(matrice_nMax,i-1,j) > th & get_pixel(matrice_nMax,i+1,j) > th) then
-                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                        matrix_hysteresis(i,j) = 255;
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 45 then
                     if(get_pixel(matrice_nMax,i-1,j-1) > th & get_pixel(matrice_nMax,i+1,j+1) > th) then
-                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                        matrix_hysteresis(i,j) = 255;
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 90 then
                     if(get_pixel(matrice_nMax,i,j-1) > th & get_pixel(matrice_nMax,i,j+1) > th) then
-                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                        matrix_hysteresis(i,j) = 255;
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
                 case 135 then
                     if(get_pixel(matrice_nMax,i+1,j-1) > th & get_pixel(matrice_nMax,i-1,j+1) > th) then
-                        matrix_hysteresis(i,j) = matrice_nMax(i,j);
+                        matrix_hysteresis(i,j) = 255;
                     else
                         matrix_hysteresis(i,j) = 0;
                     end
@@ -302,4 +319,4 @@ function image = ecrireImage(matrix_image,nomFichier)
 endfunction
 
 
-cannyFilter()
+//cannyFilter()
